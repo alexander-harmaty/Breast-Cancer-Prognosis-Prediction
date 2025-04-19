@@ -120,6 +120,6 @@ pip install tensorflow torch torchvision scikit-learn imbalanced-learn pandas nu
 This project uses the Duke Breast Cancer MRI dataset, including the clinical and other features, which is licensed under Creative Commons (CC BY-NC 4.0). The dataset is provided by The Cancer Imaging Archive (TCIA). For more details and to access the dataset, please visit: https://www.cancerimagingarchive.net/collection/duke-breast-cancer-mri DOI: 10.7937/TCIA.e3sv-re93
 
 ## Contributors
-- Mason — CNN feature extraction & serialization
+- Mason — Advanced CNN model, feature extraction, & serialization
 - Alex — Presentation, sprint planning, baseline RNN model & baseline fusion layer
 - Austine— Clinical data encoding, advanced RNN model & advanced fusion layer
