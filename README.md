@@ -69,10 +69,10 @@ pip install tensorflow torch torchvision scikit-learn imbalanced-learn pandas nu
 
 ## Getting Started
 
-### A. Prepare the Data  
-#### 1. **Clinical data for RNN**  
+### 1. **Prepare the Data**  
+#### Clinical data for RNN  
    - Already included: `Clinical_and_Other_Features.xlsx`.  
-#### 2. **MRI scans & masks for CNN**  
+#### MRI scans & masks for CNN
    - **Not included** (too large).  
    - Download the Duke Breast Cancer MRI dataset from TCIA:  
      https://wiki.cancerimagingarchive.net/display/Public/Duke-Breast-Cancer-MRI  
@@ -81,19 +81,19 @@ pip install tensorflow torch torchvision scikit-learn imbalanced-learn pandas nu
      data/images/<patient_id>/*.dcm
      data/masks/<patient_id>/Segmentation_<patient_id>_Breast.seg.nrrd
      ```
-#### 3. **Clinical labels for CNN**  
+#### Clinical labels for CNN  
    - Place a CSV (`clinical.csv`) with columns `Name,Recurrence` under `data/clinical.csv`.
 
-### B. Run in Google Colab  
-#### 1. Upload or mount your `data/` folder to Colab.  
-#### 2. Open and run:
+### 2. **Run in Google Colab** 
+#### Upload or mount your `data/` folder to Colab.  
+#### Open and run:
    - `CNN_with_pickle.ipynb` → produces `cnn_features.pkl`  
    - `Clinical_Data_RNN.ipynb` → produces `rnn_features.pkl`  
    - `Fusion_layer.ipynb` → trains & evaluates the fused model  
-#### 3. Download the generated `.pkl` files and final metrics.
+#### Download the generated `.pkl` files and final metrics.
 
-### C. Run Locally via Python Scripts  
-#### 1. CNN feature extraction
+### 3. **Run Locally via Python Scripts**  
+#### CNN feature extraction
 `python cnn_with_pickle.py \`
 
   --images_dir data/images/ \
@@ -101,13 +101,13 @@ pip install tensorflow torch torchvision scikit-learn imbalanced-learn pandas nu
   --clinical_csv data/clinical.csv \
   --output    cnn_features.pkl
 
-#### 2. RNN feature extraction
+#### RNN feature extraction
 `python clinical_data_rnn.py \`
 
   --input     Clinical_and_Other_Features.xlsx \
   --output    rnn_features.pkl
 
-#### 3. Fusion model training & evaluation
+#### Fusion model training & evaluation
 `python fusion_layer.py \`
 
   --cnn_features rnn_features.pkl \
