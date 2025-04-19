@@ -121,5 +121,5 @@ This project uses the Duke Breast Cancer MRI dataset, including the clinical and
 
 ## Contributors
 - Mason — CNN feature extraction & serialization
-- Alex — Baseline RNN model & baseline fusion layer
-- Austine— Advanced RNN model & advanced fusion layer
+- Alex — Presentation, sprint planning, baseline RNN model & baseline fusion layer
+- Austine— Clinical data encoding, advanced RNN model & advanced fusion layer
