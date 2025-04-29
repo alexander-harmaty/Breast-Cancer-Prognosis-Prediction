@@ -303,7 +303,7 @@ def train_with_advanced_callbacks(model, X_train, y_train, X_val, y_val,
                                  batch_size=32, epochs=100,
                                  early_stopping_patience=10,
                                  reduce_lr_patience=5,
-                                 model_checkpoint_path='best_model.h5'):
+                                 model_checkpoint_path='rnn_model.h5'):
     """
     Train model with advanced callbacks for better performance
 
@@ -323,7 +323,7 @@ def train_with_advanced_callbacks(model, X_train, y_train, X_val, y_val,
         Patience for early stopping
     reduce_lr_patience : int, default=5
         Patience for learning rate reduction
-    model_checkpoint_path : str, default='best_model.h5'
+    model_checkpoint_path : str, default='rnn_model.h5'
         Path to save the best model weights
 
     Returns:
@@ -574,7 +574,7 @@ def main():
       epochs=100,
       early_stopping_patience=10,
       reduce_lr_patience=5,
-      model_checkpoint_path='best_rnn_model.h5'
+      model_checkpoint_path='rnn_model.h5'
   )
 
   # Evaluate the model
@@ -592,7 +592,7 @@ def main():
   from google.colab import files
 
   # Build pickle file
-  best_rnn = load_model('best_rnn_model.h5')
+  best_rnn = load_model('rnn_model.h5')
   penult = best_rnn.layers[-3].output
   feat_extractor = Model(inputs=best_rnn.input, outputs=penult)
   rnn_feats = feat_extractor.predict(np.vstack((X_train_seq, X_val_seq, X_test_seq)))
@@ -609,6 +609,7 @@ def main():
   print("Saved RNN features to rnn_features.pkl")
 
   files.download('rnn_features.pkl')
+  files.download('rnn_model.h5')
 
 
 
