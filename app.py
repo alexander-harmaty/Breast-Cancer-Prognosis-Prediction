@@ -8,6 +8,7 @@ import pydicom
 import SimpleITK as sitk
 import torch
 from sklearn.preprocessing import LabelEncoder
+from pandas.api.types import CategoricalDtype
 import pandas.api.types as ptypes
 
 # Expected features from training (96 total, in model input order)
@@ -37,8 +38,9 @@ EXPECTED_FEATURES = [
     'Performance Status', 'Comorbidity Score', 'Physical Activity Level', 'Dietary Score'
 ]
 
-# Helper functions
+target_col = 'Recurrence event(s)'
 
+# Helper functions
 def merge_headers(col_tuple):
     first, second = col_tuple
     first = first.replace('\n', ' ').strip() if isinstance(first, str) else ''
@@ -66,36 +68,41 @@ def load_nrrd_mask(nrrd_path):
     return torch.tensor(mask).unsqueeze(0)
 
 def encode_clinical_data(uploaded_file):
+    # 1. Load Excel with multi-level header (skip metadata rows if needed)
     df = pd.read_excel(uploaded_file, header=[1, 2])
+    # 2. Flatten multi-index headers
     df.columns = [merge_headers(col) for col in df.columns]
-
-    if df.shape[0] >= 3 and any('=' in str(x) for x in df.iloc[0].values):
-        df = df.iloc[3:].reset_index(drop=True)
-
+    # 3. Rename duplicate column names with suffixes to ensure uniqueness
+    seen = {}
+    new_cols = []
+    for col in df.columns:
+        if col in seen:
+            seen[col] += 1
+            new_cols.append(f"{col}_{seen[col]-1}")
+        else:
+            seen[col] = 1
+            new_cols.append(col)
+    df.columns = new_cols
+    # 4. Drop identifier and target columns if present
     if 'Patient ID' in df.columns:
         df = df.drop(columns=['Patient ID'])
-
-    target_cols = [col for col in df.columns if 'Recurrence event' in col]
+    target_cols = [c for c in df.columns if 'Recurrence event' in c]
     if target_cols:
         df = df.drop(columns=target_cols)
-
-    for col in list(df.columns):
-        try:
-            if ptypes.is_object_dtype(df[col]) or ptypes.is_categorical_dtype(df[col]):
-                df[col] = df[col].fillna("MISSING").astype(str)
-                df[col] = pd.Categorical(df[col]).codes
-            else:
-                df[col] = df[col].fillna(0)
-        except Exception as e:
-            st.warning(f"Skipped column '{col}' due to error: {e}")
-
+    # 5. Retain only expected features (add missing ones as 0, then reorder)
     for feature in EXPECTED_FEATURES:
         if feature not in df.columns:
             df[feature] = 0
     df = df[EXPECTED_FEATURES]
-
-    clinical_array = np.expand_dims(np.expand_dims(df.values.astype(np.float32).flatten(), axis=0), axis=0)
-    st.write("Shape of clinical_array before prediction:", clinical_array.shape)
+    # 6. Encode categorical and fill missing numeric data
+    for col in df.columns:
+        if pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_categorical_dtype(df[col]):
+            df[col] = df[col].fillna("MISSING").astype(str)
+            df[col] = pd.Categorical(df[col]).codes
+        else:
+            df[col] = df[col].fillna(0)
+    # 7. Convert to numpy array with shape (1, 1, 96)
+    clinical_array = df.values.astype(np.float32).reshape(1, 1, -1)
     return clinical_array, df
 
 # Model paths
@@ -113,8 +120,9 @@ mri_file = st.file_uploader("Upload MRI Image (DICOM)", type=['dcm'])
 
 if clinical_file:
     st.write("Clinical data uploaded:")
-    clinical_array, preview_df = encode_clinical_data(clinical_file)
-    st.dataframe(preview_df.T)
+    # Use revised encoder: handles file reading, flattening, encoding, and shaping
+    clinical_array, encoded_df = encode_clinical_data(clinical_file)
+    st.dataframe(encoded_df.T)  # Display preview with feature names
 
 if mri_file:
     st.write("MRI image uploaded:")
